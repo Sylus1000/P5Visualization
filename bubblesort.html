@@ -14,9 +14,9 @@
       referrerpolicy="no-referrer"
     ></script>
     <script>
-      const window_w = 400;
-      const window_h = 400;
-      const array_size = 1000;
+      const window_w = 500;
+      const window_h = 500;
+      const array_size = 250;
       const fps = 60;
       const asc = true;
       var numbers;
@@ -34,9 +34,9 @@
         background(0, 0, 0);
         //Do one sorting step
         numbers = bubbleStep(numbers, asc);
-        //Draw
+        //Draw array
         for (let i = 0; i < numbers.length; i++) {
-          stroke(255, 255, 255);
+          stroke(255, 127, 0);
           strokeWeight(window_w / numbers.length);
           line(
             (window_w / numbers.length) * i,
@@ -45,8 +45,25 @@
             numbers[i]
           );
         }
+        //Check if array is sorted and end loop
+        if (isSorted(numbers, asc)) {
+          console.log("Finished !");
+          noLoop();
+        }
       }
-      //One step at a time (One Element)
+
+      function isSorted(array, asc) {
+        for (let i = 0; i < array.length; i++) {
+          if (asc) {
+            if (array[i] < array[i + 1]) return false;
+          } else {
+            if (array[i] > array[i + 1]) return false;
+          }
+        }
+        return true;
+      }
+
+      //One step every frame
       function bubbleStep(array, asc) {
         for (let i = 0; i < array.length; i++) {
           if (!asc) {
