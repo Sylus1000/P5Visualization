@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>P5BubbleSort</title>
+    <title>Document</title>
   </head>
   <body>
     <script
@@ -14,10 +14,10 @@
       referrerpolicy="no-referrer"
     ></script>
     <script>
-      const window_w = 500;
-      const window_h = 500;
-      const array_size = 250;
-      const fps = 60;
+      const window_w = 400;
+      const window_h = 400;
+      const array_size = 100;
+      const fps = 30;
       const asc = true;
       var numbers;
 
@@ -36,12 +36,21 @@
         numbers = bubbleStep(numbers, asc);
         //Draw array
         for (let i = 0; i < numbers.length; i++) {
-          stroke(255, 127, 0);
-          strokeWeight(window_w / numbers.length);
+          //Line properties
+          let thickness = window_w / numbers.length;
+          let xpos = (window_w / numbers.length) * i;
+          let ypos = window_h;
+          let width = xpos;
+          let height = numbers[i];
+          let color = "#ff8800";
+          stroke(color);
+
+          strokeWeight(thickness);
+
           line(
-            (window_w / numbers.length) * i,
+            (window_w / numbers.length) * i + thickness / 2,
             window_h,
-            (window_w / numbers.length) * i,
+            (window_w / numbers.length) * i + thickness / 2,
             numbers[i]
           );
         }
