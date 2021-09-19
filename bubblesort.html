@@ -47,12 +47,7 @@
 
           strokeWeight(thickness);
 
-          line(
-            (window_w / numbers.length) * i + thickness / 2,
-            window_h,
-            (window_w / numbers.length) * i + thickness / 2,
-            numbers[i]
-          );
+          line(xpos + thickness / 2, ypos, width + thickness / 2, height);
         }
         //Check if array is sorted and end loop
         if (isSorted(numbers, asc)) {
