@@ -30,28 +30,87 @@
 
       var grid, newGrid;
       var cols, rows;
-      const resolution = 5;
+      var resolution_slider = 5;
       var fps_slider;
-      const reset_after = 5; //In seconds
 
       function setup() {
         createCanvas(window.innerWidth, window.innerHeight);
-        cols = floor(width / resolution);
-        rows = floor(height / resolution);
-        grid = makeGrid(cols, rows);
-        randomlyInitialize(grid);
+
+        init();
+
         fps_slider = createSlider(10, 60, 60, 1)
           .position(10, 10)
           .style("width", "200px");
+
+        resolution_slider = createSlider(5, 20, 5, 1)
+          .position(10, 40)
+          .style("width", "200px");
+
+        createButton("Reset")
+          .position(10, 70)
+          .style("width", "100px")
+          .style("height", "25px")
+          .mousePressed(init);
       }
 
-      function randomlyInitialize(grid) {
+      function init() {
+        loadImage(
+          "pattern.png",
+          (img) => {
+            imageInitialize(img);
+          },
+          () => {
+            randomlyInitialize();
+          }
+        );
+      }
+
+      function imageInitialize(p5Img) {
+        //Load pixel array
+        p5Img.loadPixels();
+
+        //Calculate grid
+        cols = floor(p5Img.width / resolution_slider.value());
+        rows = floor(p5Img.height / resolution_slider.value());
+        grid = makeGrid(cols, rows);
+
+        //Resize pixel array to new resolution
+        p5Img.resize(cols, rows);
+        pixels = p5Img.pixels;
+
+        for (let i = 0; i < cols; i++) {
+          for (let j = 0; j < rows; j++) {
+            //Pixel is black
+            if (
+              pixels[i + j] === 0 &&
+              pixels[i + j + 1] === 0 &&
+              pixels[i + j + 2] === 0
+            ) {
+              grid[i][j] = 0;
+            }
+            //Pixel is white
+            else if (
+              pixels[i + j] === 255 &&
+              pixels[i + j + 1] === 255 &&
+              pixels[i + j + 2] === 255
+            ) {
+              grid[i][j] = 1;
+            }
+          }
+        }
+      }
+
+      function randomlyInitialize() {
         //Initialize grid with random values between 0 and 1
+        cols = floor(width / resolution_slider.value());
+        rows = floor(height / resolution_slider.value());
+        grid = makeGrid(cols, rows);
         for (let i = 0; i < grid.length; i++) {
           for (let j = 0; j < grid[i].length; j++) {
             grid[i][j] = floor(random(2));
           }
         }
+        return grid;
       }
 
       function draw() {
@@ -61,10 +120,6 @@
         newGrid = makeGrid(cols, rows);
         computeState();
         grid = newGrid;
-        //Randomize grid again after x amount of seconds
-        if (frameCount % (fps_slider.value() * reset_after) === 0) {
-          randomlyInitialize(grid);
-        }
       }
 
       function computeState() {
@@ -100,10 +155,10 @@
               fill(255);
               stroke(0);
               rect(
-                i * resolution,
-                j * resolution,
-                resolution - 1,
-                resolution - 1
+                i * resolution_slider.value(),
+                j * resolution_slider.value(),
+                resolution_slider.value() - 1,
+                resolution_slider.value() - 1
               );
             }
           }
