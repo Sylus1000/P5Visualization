@@ -24,6 +24,9 @@
         let grid = new Array(cols);
         for (let i = 0; i < grid.length; i++) {
           grid[i] = new Array(rows);
+          for (let j = 0; j < grid[i].length; j++) {
+            grid[i][j] = 0;
+          }
         }
         return grid;
       }
@@ -74,6 +77,8 @@
         cols = p5Img.width;
         rows = p5Img.height;
         grid = makeGrid(cols, rows);
+
+        //console.table(grid);
 
         let j = 0;
 
