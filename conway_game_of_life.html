@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GameOfLife</title>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.min.js"
+      integrity="sha512-N4kV7GkNv7QR7RX9YF/olywyIgIwNvfEe2nZtfyj73HdjCUkAfOBDbcuJ/cTaN04JKRnw1YG1wnUyNKMsNgg3g=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <script>
+      function makeGrid(cols, rows) {
+        let grid = new Array(cols);
+        for (let i = 0; i < grid.length; i++) {
+          grid[i] = new Array(rows);
+        }
+        return grid;
+      }
+
+      var grid, newGrid;
+      var cols, rows;
+      const resolution = 5;
+
+      function setup() {
+        createCanvas(window.innerWidth, window.innerHeight);
+        cols = floor(width / resolution);
+        rows = floor(height / resolution);
+        grid = makeGrid(cols, rows);
+        randomlyInitialize(grid);
+      }
+
+      function randomlyInitialize(grid) {
+        //Initialize grid with random values between 0 and 1
+        for (let i = 0; i < grid.length; i++) {
+          for (let j = 0; j < grid[i].length; j++) {
+            grid[i][j] = floor(random(2));
+          }
+        }
+      }
+
+      function draw() {
+        background(0);
+        showGrid();
+        newGrid = makeGrid(cols, rows);
+        computeState();
+        grid = newGrid;
+      }
+
+      function computeState() {
+        for (let i = 0; i < cols; i++) {
+          for (let j = 0; j < rows; j++) {
+            let state = grid[i][j];
+            let neighbours = countNeighbours(grid, i, j);
+            if (state === 0 && neighbours === 3) {
+              newGrid[i][j] = 1;
+            } else if (state === 1 && (neighbours < 2 || neighbours > 3)) {
+              newGrid[i][j] = 0;
+            } else newGrid[i][j] = state;
+          }
+        }
+      }
+
+      function countNeighbours(grid, x, y) {
+        let sum = 0;
+        for (let i = -1; i < 2; i++) {
+          for (let j = -1; j < 2; j++) {
+            sum += grid[(x + i + cols) % cols][(y + j + rows) % rows];
+          }
+        }
+        return sum;
+      }
+
+      function showGrid() {
+        for (let i = 0; i < cols; i++) {
+          for (let j = 0; j < rows; j++) {
+            if (grid[i][j] === 1) {
+              fill(255);
+              stroke(0);
+              rect(
+                i * resolution,
+                j * resolution,
+                resolution - 1,
+                resolution - 1
+              );
+            }
+          }
+        }
+      }
+    </script>
+  </body>
+</html>
