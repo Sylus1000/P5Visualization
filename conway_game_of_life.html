@@ -31,6 +31,8 @@
       var grid, newGrid;
       var cols, rows;
       const resolution = 5;
+      var fps_slider;
+      const reset_after = 5; //In seconds
 
       function setup() {
         createCanvas(window.innerWidth, window.innerHeight);
@@ -38,6 +40,9 @@
         rows = floor(height / resolution);
         grid = makeGrid(cols, rows);
         randomlyInitialize(grid);
+        fps_slider = createSlider(10, 60, 10, 1)
+          .position(10, 10)
+          .style("width", "150px");
       }
 
       function randomlyInitialize(grid) {
@@ -50,11 +55,16 @@
       }
 
       function draw() {
+        frameRate(fps_slider.value());
         background(0);
         showGrid();
         newGrid = makeGrid(cols, rows);
         computeState();
         grid = newGrid;
+        //Randomize grid again after x amount of seconds
+        if (frameCount % (fps_slider.value() * reset_after) === 0) {
+          randomlyInitialize(grid);
+        }
       }
 
       function computeState() {
@@ -66,7 +76,9 @@
               newGrid[i][j] = 1;
             } else if (state === 1 && (neighbours < 2 || neighbours > 3)) {
               newGrid[i][j] = 0;
-            } else newGrid[i][j] = state;
+            } else {
+              newGrid[i][j] = state;
+            }
           }
         }
       }
