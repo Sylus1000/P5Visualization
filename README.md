@@ -1,3 +1,3 @@
-# SortingVisualization
+# Visualizations
 
 with p5.js
