@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+      }
+    </style>
+    <title>QuickSort</title>
+  </head>
+  <body>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.min.js"
+      integrity="sha512-N4kV7GkNv7QR7RX9YF/olywyIgIwNvfEe2nZtfyj73HdjCUkAfOBDbcuJ/cTaN04JKRnw1YG1wnUyNKMsNgg3g=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <script>
+      const window_w = 550;
+      var array_size;
+      const fps = 60;
+      const asc = true;
+      var swapDelay;
+
+      var reset;
+      var numbers;
+
+      function setup() {
+        createCanvas(window_w, window_w);
+        array_size = createSlider(10, 1000, 300, 1).position(20, 20);
+        swapDelay = createSlider(5, 50, 5, 1).position(20, 40);
+        reset = createButton("Reset")
+          .position(0, window_w + 20)
+          .style("width", "200px")
+          .style("height", "25px")
+          .mousePressed(() => {
+            reset.hide();
+            numbers = new Array(array_size.value());
+            for (let i = 0; i < numbers.length; i++) {
+              numbers[i] = Math.random() * (window_w - 1) + 1;
+            }
+            quickSort(numbers, 0, numbers.length - 1);
+            loop();
+          })
+          .hide();
+        numbers = new Array(array_size.value());
+        for (let i = 0; i < numbers.length; i++) {
+          numbers[i] = Math.random() * (window_w - 1) + 1;
+        }
+
+        frameRate(fps);
+        quickSort(numbers, 0, numbers.length - 1);
+      }
+
+      async function quickSort(arr, start, end) {
+        //End one step if start and end cross over each other
+        if (start >= end) return;
+
+        //Sort array according to pivot and split at new pivot index into two arrays
+        let pivot = arr[end];
+        let pivot_index = start;
+        for (let i = start; i < end; i++) {
+          if (asc) {
+            if (arr[i] > pivot) {
+              //do not wait for swapping i and pivot index
+              await swap(arr, i, pivot_index);
+              pivot_index++;
+            }
+          } else {
+            if (arr[i] < pivot) {
+              //do not wait for swapping i and pivot index
+              await swap(arr, i, pivot_index);
+              pivot_index++;
+            }
+          }
+        }
+        //do not Wait for swapping pivot index with end
+        await swap(arr, pivot_index, end);
+
+        //do not wait for left and right half to be sorted
+        await Promise.all([
+          quickSort(arr, start, pivot_index - 1),
+          quickSort(arr, pivot_index + 1, end),
+        ]);
+      }
+
+      function draw() {
+        background(0, 0, 0);
+
+        //Draw array
+        for (let i = 0; i < numbers.length; i++) {
+          //Line properties
+          let thickness = window_w / numbers.length;
+          let xpos = thickness * i;
+          let ypos = window_w;
+          stroke("#88ff00");
+
+          strokeWeight(thickness);
+
+          line(xpos + thickness / 2, ypos, xpos + thickness / 2, numbers[i]);
+
+          //Dont check every frame but every 10th frame
+          if (frameCount % 10 === 0) {
+            if (isSorted(numbers, asc)) {
+              reset.show();
+              noLoop();
+            }
+          }
+        }
+      }
+
+      function isSorted(arr, asc) {
+        for (let i = 0; i < arr.length - 1; i++) {
+          if (asc) {
+            if (arr[i] < arr[i + 1]) return false;
+          } else {
+            if (arr[i] > arr[i + 1]) return false;
+          }
+        }
+        return true;
+      }
+
+      async function swap(array, index1, index2) {
+        await sleep(swapDelay.value());
+        let temp = array[index1];
+        array[index1] = array[index2];
+        array[index2] = temp;
+      }
+
+      function sleep(ms) {
+        return new Promise((resolve) => setTimeout(resolve, ms));
+      }
+    </script>
+  </body>
+</html>
