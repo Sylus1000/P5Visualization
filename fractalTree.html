@@ -36,11 +36,11 @@
         createCanvas(canvas_w, canvas_w);
         frameRate(fps);
         angle_slider = createSlider(0, PI / 2, PI / 8, 0.1);
-        left_shrink_slider = createSlider(0.5, 0.8, 0.5, 0.01);
-        right_shrink_slider = createSlider(0.5, 0.8, 0.5, 0.01);
+        left_shrink_slider = createSlider(0.5, 0.8, 0.6, 0.01);
+        right_shrink_slider = createSlider(0.5, 0.8, 0.8, 0.01);
         min_branch_length_slider = createSlider(5, 10, 10, 1);
         scale_slider = createSlider(2, 8, 4, 1);
-        xpos_slider = createSlider(0, canvas_w, canvas_w / 2, 1);
+        xpos_slider = createSlider(0, canvas_w, 305, 1);
       }
       function draw() {
         background(127);
