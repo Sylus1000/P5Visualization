@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GameOfLife</title>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.min.js"
+      integrity="sha512-N4kV7GkNv7QR7RX9YF/olywyIgIwNvfEe2nZtfyj73HdjCUkAfOBDbcuJ/cTaN04JKRnw1YG1wnUyNKMsNgg3g=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <script>
+      function makeGrid(cols, rows) {
+        let grid = new Array(cols);
+        for (let i = 0; i < grid.length; i++) {
+          grid[i] = new Array(rows);
+          for (let j = 0; j < grid[i].length; j++) {
+            grid[i][j] = 0;
+          }
+        }
+        return grid;
+      }
+
+      var grid, newGrid;
+      var cols, rows;
+      var resolution_slider;
+      var fps_slider;
+
+      function setup() {
+        createCanvas(window.innerWidth, window.innerHeight);
+
+        init();
+
+        fps_slider = createSlider(10, 60, 60, 1)
+          .position(10, 10)
+          .style("width", "200px");
+
+        resolution_slider = createSlider(5, 20, 5, 1)
+          .position(10, 40)
+          .style("width", "200px");
+
+        createButton("Reset")
+          .position(10, 70)
+          .style("width", "100px")
+          .style("height", "25px")
+          .mousePressed(init);
+      }
+
+      function init() {
+        noiseSeed(random(100));
+        loadImage(
+          "pattern.png",
+          (img) => {
+            imageInitialize(img);
+          },
+          (err) => {
+            perlinInitialize();
+          }
+        );
+      }
+
+      function imageInitialize(p5Img) {
+        /*
+        //Load pixel array
+        p5Img.loadPixels();
+        pixels = p5Img.pixels;
+
+        //Calculate grid
+        cols = p5Img.width;
+        rows = p5Img.height;
+        grid = makeGrid(cols, rows);
+
+        //console.table(grid);
+
+        let j = 0;
+
+        for (let i = 0; i < pixels.length; i++) {
+          //After cols iterations increase j
+          if ((i + 1) % cols === 0) j++;
+
+          //Black pixel
+          if (pixels[i] === 0 && pixels[i + 1] === 0 && pixels[i + 2] === 0) {
+            grid[i][j] = 0;
+          }
+          //White pixel
+          else if (
+            pixels[i] === 255 &&
+            pixels[i + 1] === 255 &&
+            pixels[i + 2] === 255
+          ) {
+            grid[i][j] = 1;
+          }
+        }
+        */
+        console.log("[ImgInit] Not implemented yet !");
+        perlinInitialize();
+      }
+
+      function perlinInitialize() {
+        //Initialize grid with random values between 0 and 1
+        cols = floor(width / resolution_slider.value());
+        rows = floor(height / resolution_slider.value());
+        grid = makeGrid(cols, rows);
+        for (let i = 0; i < grid.length; i++) {
+          for (let j = 0; j < grid[i].length; j++) {
+            let nvalue = floor(noise(i + j) * 2);
+            grid[i][j] = nvalue;
+          }
+        }
+        return grid;
+      }
+
+      function draw() {
+        frameRate(fps_slider.value());
+        background(0);
+        showGrid();
+        newGrid = makeGrid(cols, rows);
+        computeState();
+        grid = newGrid;
+      }
+
+      function computeState() {
+        for (let i = 0; i < cols; i++) {
+          for (let j = 0; j < rows; j++) {
+            let state = grid[i][j];
+            let neighbours = countNeighbours(grid, i, j);
+            if (state === 0 && neighbours === 3) {
+              newGrid[i][j] = 1;
+            } else if (state === 1 && (neighbours < 2 || neighbours > 3)) {
+              newGrid[i][j] = 0;
+            } else {
+              newGrid[i][j] = state;
+            }
+          }
+        }
+      }
+
+      function countNeighbours(grid, x, y) {
+        let sum = 0;
+        for (let i = -1; i < 2; i++) {
+          for (let j = -1; j < 2; j++) {
+            sum += grid[(x + i + cols) % cols][(y + j + rows) % rows];
+          }
+        }
+        return sum;
+      }
+
+      function showGrid() {
+        for (let i = 0; i < cols; i++) {
+          for (let j = 0; j < rows; j++) {
+            if (grid[i][j] === 1) {
+              fill(255);
+              stroke(0);
+              rect(
+                i * resolution_slider.value(),
+                j * resolution_slider.value(),
+                resolution_slider.value() - 1,
+                resolution_slider.value() - 1
+              );
+            }
+          }
+        }
+      }
+    </script>
+  </body>
+</html>
