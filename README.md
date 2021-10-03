@@ -11,5 +11,5 @@ with p5.js
 # GameOfLife (perlin noise)
 ![alt text](https://raw.githubusercontent.com/Sylus1000/P5Visualization/main/screenshots/gameoflife2.png)
 
-#QuickSort
+# QuickSort
 ![alt text](https://raw.githubusercontent.com/Sylus1000/P5Visualization/main/screenshots/quicksort.png)
