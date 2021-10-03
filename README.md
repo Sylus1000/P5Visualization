@@ -4,4 +4,4 @@ with p5.js
 
 # BubbleSort
 
-![alt text](https://github.com/Sylus1000/P5Visualization/screenshots/bubblesort.png?raw=true
+![alt text](https://raw.githubusercontent.com/Sylus1000/P5Visualization/main/screenshots/bubblesort.png)
