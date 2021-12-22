@@ -78,10 +78,10 @@
             }
           }
         }
-        //do not Wait for swapping pivot index with end
+        //wait for swapping pivot index with end
         await swap(arr, pivot_index, end);
 
-        //do not wait for left and right half to be sorted
+        //wait for left and right half to be sorted
         await Promise.all([
           quickSort(arr, start, pivot_index - 1),
           quickSort(arr, pivot_index + 1, end),
