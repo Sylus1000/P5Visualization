@@ -66,13 +66,13 @@
         for (let i = start; i < end; i++) {
           if (asc) {
             if (arr[i] > pivot) {
-              //do not wait for swapping i and pivot index
+              //wait for swapping i and pivot index
               await swap(arr, i, pivot_index);
               pivot_index++;
             }
           } else {
             if (arr[i] < pivot) {
-              //do not wait for swapping i and pivot index
+              //wait for swapping i and pivot index
               await swap(arr, i, pivot_index);
               pivot_index++;
             }
