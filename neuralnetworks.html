@@ -108,7 +108,11 @@
         }
       }
 
-      function mousePressed() {
+      function mouseDragged() {
+        fillValue = 1;
+        if (keyIsDown(ALT)) {
+          fillValue = 0;
+        }
         // Update input panel based on mouse position
         for (let i = 0; i < panelSize; i++) {
           for (let j = 0; j < panelSize; j++) {
@@ -120,7 +124,7 @@
               mouseY > y &&
               mouseY < y + inputSize
             ) {
-              inputPanel[i][j] = 1 - inputPanel[i][j]; // Toggle between 0 and 1
+              inputPanel[i][j] = fillValue;
             }
           }
         }
