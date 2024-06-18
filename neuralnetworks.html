@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+      }
+    </style>
+    <title>NeuralNetworks</title>
+  </head>
+  <body>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/p5.min.js"
+      integrity="sha512-d6sc8kbZEtA2LwB9m/ck0FhvyUwVfdmvTeyJRprmj7Wg9wRFtHDIpr6qk4g/y3Ix3O9I6KHIv6SGu9f7RaP1Gw=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <script>
+      let network = [];
+      let layers = [49, 10, 10]; // Example: 4 layers with 25, 10, 10, and 1 neuron(s) respectively
+      let activations = [];
+      let inputPanel = [];
+      let panelSize = Math.sqrt(layers[0]);
+      let inputSize = 50;
+
+      function setup() {
+        createCanvas(window.innerWidth, window.innerHeight);
+
+        // Initialize input panel with zeros
+        for (let i = 0; i < panelSize; i++) {
+          inputPanel[i] = [];
+          for (let j = 0; j < panelSize; j++) {
+            inputPanel[i][j] = 0;
+          }
+        }
+
+        // Initialize network
+        for (let i = 0; i < layers.length; i++) {
+          network[i] = [];
+          activations[i] = [];
+          for (let j = 0; j < layers[i]; j++) {
+            let x = ((i + 1) * width) / (layers.length + 1);
+            let y = ((j + 1) * height) / (layers[i] + 1);
+            network[i][j] = createVector(x, y);
+            activations[i][j] = 0;
+          }
+        }
+      }
+
+      function draw() {
+        background(255);
+        drawInputPanel();
+        drawNetwork();
+      }
+
+      function drawNetwork() {
+        stroke(0);
+
+        // Draw connections
+        for (let i = 0; i < network.length - 1; i++) {
+          for (let j = 0; j < network[i].length; j++) {
+            for (let k = 0; k < network[i + 1].length; k++) {
+              //strokeWeight(map(random(-1, 1), -1, 1, 0.5, 2)); // Simulate weight strength
+              line(
+                network[i][j].x,
+                network[i][j].y,
+                network[i + 1][k].x,
+                network[i + 1][k].y
+              );
+            }
+          }
+        }
+
+        // Draw neurons
+        for (let i = 0; i < network.length; i++) {
+          for (let j = 0; j < network[i].length; j++) {
+            let neuron = network[i][j];
+            let activation = activations[i][j];
+            fill(map(activation, 0, 1, 255, 0));
+            strokeWeight(1);
+            ellipse(neuron.x, neuron.y, 50, 50);
+          }
+        }
+      }
+
+      function drawInputPanel() {
+        for (let i = 0; i < panelSize; i++) {
+          for (let j = 0; j < panelSize; j++) {
+            let x = i * inputSize;
+            let y = j * inputSize;
+            let val = inputPanel[i][j];
+            fill(val == 1 ? 0 : 255); // 0 is white, 1 is black
+            stroke(0);
+            rect(x, y, inputSize, inputSize);
+          }
+        }
+      }
+
+      function registerInputPanelActivations() {
+        // Reset activations based on input panel values
+        for (let i = 0; i < panelSize; i++) {
+          for (let j = 0; j < panelSize; j++) {
+            activations[0][i * panelSize + j] = inputPanel[i][j];
+          }
+        }
+      }
+
+      function mousePressed() {
+        // Update input panel based on mouse position
+        for (let i = 0; i < panelSize; i++) {
+          for (let j = 0; j < panelSize; j++) {
+            let x = i * inputSize;
+            let y = j * inputSize;
+            if (
+              mouseX > x &&
+              mouseX < x + inputSize &&
+              mouseY > y &&
+              mouseY < y + inputSize
+            ) {
+              inputPanel[i][j] = 1 - inputPanel[i][j]; // Toggle between 0 and 1
+            }
+          }
+        }
+        registerInputPanelActivations();
+      }
+    </script>
+  </body>
+</html>
