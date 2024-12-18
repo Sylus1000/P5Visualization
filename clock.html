@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.2/p5.min.js"
+      integrity="sha512-1YMgn4j8cIL91s14ByDGmHtBU6+F8bWOMcF47S0cRO3QNm8SKPNexy4s3OCim9fABUtO++nJMtcpWbINWjMSzQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <title>Clock with Toggle</title>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+        background-color: #a887e0;
+      }
+      .toggle-container {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        background: #ffffff;
+        padding: 10px;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        font-family: Arial, sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="toggle-container">
+      <label>
+        <input type="checkbox" id="toggle-smooth" />
+        Smooth Second Hand
+      </label>
+    </div>
+    <script>
+      let centerX, centerY;
+      let diameter, radius;
+      let smoothSecondHand = false; // Default to ticking
+      let bgColor;
+
+      function setup() {
+        createCanvas(windowWidth, windowHeight);
+        setupClock();
+
+        // Add event listener for the toggle switch
+        const toggle = document.getElementById("toggle-smooth");
+        toggle.addEventListener("change", () => {
+          smoothSecondHand = toggle.checked;
+        });
+      }
+
+      function setupClock() {
+        centerX = width / 2;
+        centerY = height / 2;
+        diameter = min(width, height) - 200;
+        radius = diameter / 2;
+        bgColor = color(168, 135, 224);
+      }
+
+      function draw() {
+        background(bgColor);
+        drawClockBody();
+        drawHands();
+      }
+
+      function windowResized() {
+        resizeCanvas(windowWidth, windowHeight);
+        setupClock();
+      }
+
+      function drawClockBody() {
+        stroke(255);
+        strokeWeight(3);
+        noFill();
+        circle(centerX, centerY, diameter);
+
+        drawHourMarkers();
+        drawMinuteMarkers();
+      }
+
+      function drawHourMarkers() {
+        stroke(255);
+        strokeWeight(8);
+        const deltaTheta = TWO_PI / 12;
+        for (let i = 0; i < 12; i++) {
+          const theta = i * deltaTheta;
+          const x1 = centerX + radius * 0.9 * cos(theta);
+          const y1 = centerY + radius * 0.9 * sin(theta);
+          const x2 = centerX + radius * 0.8 * cos(theta);
+          const y2 = centerY + radius * 0.8 * sin(theta);
+          line(x1, y1, x2, y2);
+        }
+      }
+
+      function drawMinuteMarkers() {
+        stroke(200);
+        strokeWeight(4);
+        const deltaTheta = TWO_PI / 60;
+        for (let i = 0; i < 60; i++) {
+          const theta = i * deltaTheta;
+          const x1 = centerX + radius * 0.9 * cos(theta);
+          const y1 = centerY + radius * 0.9 * sin(theta);
+          const x2 = centerX + radius * 0.85 * cos(theta);
+          const y2 = centerY + radius * 0.85 * sin(theta);
+          line(x1, y1, x2, y2);
+        }
+      }
+
+      function drawHands() {
+        const now = new Date();
+
+        // Seconds
+        const seconds = now.getSeconds();
+        const millis = now.getMilliseconds();
+        let secondTheta;
+        if (smoothSecondHand) {
+          secondTheta = map(
+            seconds * 1000 + millis,
+            0,
+            60000,
+            -HALF_PI,
+            TWO_PI - HALF_PI
+          );
+        } else {
+          secondTheta = map(seconds, 0, 60, -HALF_PI, TWO_PI - HALF_PI);
+        }
+        drawHand(secondTheta, radius * 0.8, color(235, 119, 52), 2);
+
+        // Minutes
+        const minutes = now.getMinutes() + seconds / 60;
+        const minuteTheta = map(minutes, 0, 60, -HALF_PI, TWO_PI - HALF_PI);
+        drawHand(minuteTheta, radius * 0.6, color(93, 27, 207), 5);
+
+        // Hours
+        const hours = (now.getHours() % 12) + minutes / 60;
+        const hourTheta = map(hours, 0, 12, -HALF_PI, TWO_PI - HALF_PI);
+        drawHand(hourTheta, radius * 0.5, color(255), 8);
+      }
+
+      function drawHand(theta, length, strokeColor, weight) {
+        stroke(strokeColor);
+        strokeWeight(weight);
+        const x = centerX + length * cos(theta);
+        const y = centerY + length * sin(theta);
+        line(centerX, centerY, x, y);
+      }
+    </script>
+  </body>
+</html>
