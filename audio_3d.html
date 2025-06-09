@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>3D Audio Visualizer with Multiple Visualizations & Controls</title>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.3/p5.min.js"
+      integrity="sha512-I0Pwwz3PPNQkWes+rcSoQqikKFfRmTfGQrcNzZbm8ALaUyJuFdyRinl805shE8xT6iEWsWgvRxdXb3yhQNXKoA=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.3/addons/p5.sound.min.js"
+      integrity="sha512-WzkwpdWEMAY/W8WvP9KS2/VI6zkgejR4/KTxTl4qHx0utqeyVE0JY+S1DlMuxDChC7x0oXtk/ESji6a0lP/Tdg=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <style>
+      body,
+      html {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        overflow: hidden;
+        background: #111;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        color: white;
+        user-select: none;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+      #drop-area {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 350px;
+        height: 200px;
+        border: 4px dashed #aaa;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        font-size: 1.3rem;
+        background: rgba(255 255 255 / 0.05);
+        transition: background-color 0.3s, border-color 0.3s;
+        z-index: 10;
+        padding: 20px;
+        cursor: pointer;
+        user-select: none;
+      }
+      #drop-area.highlight {
+        background-color: rgba(100, 150, 255, 0.15);
+        border-color: #6496ff;
+        color: #6496ff;
+      }
+      canvas {
+        display: block;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+      }
+      #controls {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 20;
+        background: rgba(0, 0, 0, 0.6);
+        padding: 10px 20px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+      }
+      #controls button {
+        background: transparent;
+        border: none;
+        color: #6496ff;
+        font-size: 28px;
+        cursor: pointer;
+        transition: color 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 4px 8px;
+      }
+      #controls button:hover {
+        color: #4174f7;
+      }
+      #seek-bar {
+        width: 300px;
+        cursor: pointer;
+        -webkit-appearance: none;
+        height: 6px;
+        border-radius: 3px;
+        background: #444;
+        outline: none;
+      }
+      #seek-bar::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: #6496ff;
+        cursor: pointer;
+        border: none;
+        margin-top: -5px;
+        transition: background-color 0.3s;
+      }
+      #seek-bar::-webkit-slider-thumb:hover {
+        background: #4174f7;
+      }
+      #seek-bar::-moz-range-thumb {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: #6496ff;
+        cursor: pointer;
+        border: none;
+        transition: background-color 0.3s;
+      }
+      #seek-bar::-moz-range-thumb:hover {
+        background: #4174f7;
+      }
+      #sample-interval-control {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #ddd;
+        font-size: 0.9rem;
+        min-width: 180px;
+        user-select: none;
+      }
+      #sample-interval-control input[type="range"] {
+        flex-grow: 1;
+        cursor: pointer;
+        -webkit-appearance: none;
+        height: 6px;
+        border-radius: 3px;
+        background: #444;
+        outline: none;
+      }
+      #sample-interval-control input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: #6496ff;
+        cursor: pointer;
+        border: none;
+        margin-top: -5px;
+        transition: background-color 0.3s;
+      }
+      #sample-interval-control input[type="range"]::-webkit-slider-thumb:hover {
+        background: #4174f7;
+      }
+      #sample-interval-control input[type="range"]::-moz-range-thumb {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: #6496ff;
+        cursor: pointer;
+        border: none;
+        transition: background-color 0.3s;
+      }
+      #sample-interval-control input[type="range"]::-moz-range-thumb:hover {
+        background: #4174f7;
+      }
+      /* Side toolbar */
+      #sidebar {
+        position: fixed;
+        top: 50%;
+        right: 0;
+        transform: translateY(-50%);
+        background: rgba(20, 20, 30, 0.9);
+        padding: 15px;
+        border-top-left-radius: 15px;
+        border-bottom-left-radius: 15px;
+        color: #eee;
+        font-size: 14px;
+        width: 180px;
+        z-index: 30;
+        user-select: none;
+        box-shadow: -3px 0 8px rgba(0, 0, 0, 0.8);
+      }
+      #sidebar h3 {
+        margin-top: 0;
+        font-weight: 600;
+        text-align: center;
+        margin-bottom: 15px;
+        color: #6496ff;
+      }
+      #sidebar button {
+        width: 100%;
+        background: #222a44;
+        border: none;
+        color: #aaccff;
+        padding: 10px 8px;
+        margin-bottom: 8px;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: background-color 0.3s, color 0.3s;
+      }
+      #sidebar button:hover,
+      #sidebar button.active {
+        background: #6496ff;
+        color: #fff;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="drop-area">
+      Drag & Drop an MP3 file here to start visualization
+    </div>
+
+    <div id="controls" style="display: none">
+      <button id="play-pause-btn" title="Pause" aria-label="Pause">
+        &#10073;&#10073;
+      </button>
+      <!-- pause icon initially -->
+      <button id="stop-btn" title="Stop" aria-label="Stop">&#9632;</button>
+      <input
+        type="range"
+        id="seek-bar"
+        min="0"
+        max="100"
+        value="0"
+        step="0.1"
+      />
+      <div id="sample-interval-control" title="Adjust sampling interval (ms)">
+        <label for="sample-interval-slider">Sample Interval:</label>
+        <input
+          type="range"
+          id="sample-interval-slider"
+          min="50"
+          max="1000"
+          value="300"
+          step="10"
+        />
+        <span id="sample-interval-value">300 ms</span>
+      </div>
+    </div>
+
+    <div id="sidebar">
+      <h3>Visualizations</h3>
+      <button class="vis-btn active" data-vis="lineTrail">Line Trail</button>
+      <button class="vis-btn" data-vis="freqBars">Spinning Bars</button>
+      <button class="vis-btn" data-vis="ampSphere">Amplitude Sphere</button>
+    </div>
+
+    <script>
+      let soundFile;
+      let fft, amplitude;
+      let points = [];
+      let lastSampleTime = 0;
+      let sampleInterval = 300; // ms
+      let currentVis = "lineTrail";
+
+      const dropArea = document.getElementById("drop-area");
+      const controls = document.getElementById("controls");
+      const playPauseBtn = document.getElementById("play-pause-btn");
+      const stopBtn = document.getElementById("stop-btn");
+      const seekBar = document.getElementById("seek-bar");
+      const sampleIntervalSlider = document.getElementById(
+        "sample-interval-slider"
+      );
+      const sampleIntervalValue = document.getElementById(
+        "sample-interval-value"
+      );
+      const visButtons = document.querySelectorAll(".vis-btn");
+
+      function setup() {
+        let cnv = createCanvas(windowWidth, windowHeight, WEBGL);
+        cnv.style("z-index", "1");
+
+        fft = new p5.FFT(0.8, 1024);
+        amplitude = new p5.Amplitude();
+        noFill();
+
+        playPauseBtn.addEventListener("click", () => {
+          if (!soundFile) return;
+          if (soundFile.isPlaying()) {
+            soundFile.pause();
+            updatePlayPauseIcon(false);
+          } else {
+            soundFile.play();
+            updatePlayPauseIcon(true);
+          }
+        });
+
+        stopBtn.addEventListener("click", () => {
+          if (soundFile) {
+            soundFile.stop();
+            points = [];
+            seekBar.value = 0;
+            updatePlayPauseIcon(false);
+
+            dropArea.style.display = "flex";
+            controls.style.display = "none";
+            soundFile.disconnect();
+            soundFile = null;
+          }
+        });
+
+        seekBar.addEventListener("input", () => {
+          if (soundFile) {
+            let seekTime = map(seekBar.value, 0, 100, 0, soundFile.duration());
+            soundFile.jump(seekTime);
+            points = [];
+            lastSampleTime = millis();
+          }
+        });
+
+        sampleIntervalSlider.addEventListener("input", () => {
+          sampleInterval = parseInt(sampleIntervalSlider.value);
+          sampleIntervalValue.textContent = sampleInterval + " ms";
+        });
+
+        visButtons.forEach((button) => {
+          button.addEventListener("click", () => {
+            visButtons.forEach((b) => b.classList.remove("active"));
+            button.classList.add("active");
+            currentVis = button.getAttribute("data-vis");
+            points = [];
+            lastSampleTime = millis();
+          });
+        });
+      }
+
+      function draw() {
+        background(10);
+        orbitControl();
+
+        if (!soundFile) return;
+
+        if (!seekBar.matches(":active") && soundFile.isPlaying()) {
+          let currentTime = soundFile.currentTime();
+          let dur = soundFile.duration();
+          seekBar.value = map(currentTime, 0, dur, 0, 100);
+        }
+
+        let now = millis();
+        if (now - lastSampleTime >= sampleInterval && soundFile.isPlaying()) {
+          lastSampleTime = now;
+
+          switch (currentVis) {
+            case "lineTrail":
+              sampleLineTrail();
+              break;
+            case "freqBars":
+              sampleFreqBars();
+              break;
+            case "ampSphere":
+              sampleAmpSphere();
+              break;
+          }
+        }
+
+        // Draw the current visualization
+        switch (currentVis) {
+          case "lineTrail":
+            drawLineTrail();
+            break;
+          case "freqBars":
+            drawFreqBars();
+            break;
+          case "ampSphere":
+            drawAmpSphere();
+            break;
+        }
+      }
+
+      function windowResized() {
+        resizeCanvas(windowWidth, windowHeight);
+      }
+
+      // ==== VISUALIZATION VARIABLES ====
+
+      let freqBarsData = [];
+      let ampSphereRadius = 100;
+      let ampSphereColorHue = 0;
+
+      // ==== VISUALIZATION SAMPLING FUNCTIONS ====
+
+      function sampleLineTrail() {
+        let level = amplitude.getLevel();
+        let freqCentroid = fft.getCentroid();
+
+        let x = map(level, 0, 1, -200, 200);
+        let y = map(freqCentroid, 0, 20000, -200, 200);
+        let z = -points.length * 10;
+
+        points.push(createVector(x, y, z));
+        if (points.length > 1000) points.shift();
+      }
+
+      function sampleFreqBars() {
+        let spectrum = fft.analyze();
+        freqBarsData = [];
+        // Take first 64 bins for performance
+        for (let i = 0; i < 64; i++) {
+          freqBarsData[i] = spectrum[i];
+        }
+      }
+
+      function sampleAmpSphere() {
+        let level = amplitude.getLevel();
+        let freqCentroid = fft.getCentroid();
+
+        // Radius pulsates with amplitude
+        ampSphereRadius = map(level, 0, 1, 50, 200);
+        // Hue cycles with frequency centroid
+        ampSphereColorHue = map(freqCentroid, 0, 20000, 0, 360);
+      }
+
+      // ==== VISUALIZATION DRAW FUNCTIONS ====
+
+      function drawLineTrail() {
+        stroke(255);
+        noFill();
+        beginShape();
+        for (let v of points) {
+          vertex(v.x, v.y, v.z);
+        }
+        endShape();
+      }
+
+      function drawFreqBars() {
+        if (!freqBarsData.length) return;
+
+        push();
+        rotateY(frameCount * 0.01);
+        let barWidth = 6;
+        let radius = 150;
+        let angleStep = TWO_PI / freqBarsData.length;
+
+        for (let i = 0; i < freqBarsData.length; i++) {
+          let val = freqBarsData[i];
+          let h = map(val, 0, 255, 10, 150);
+
+          let angle = i * angleStep;
+          let x = radius * cos(angle);
+          let z = radius * sin(angle);
+
+          push();
+          translate(x, -h / 2, z);
+          fill(map(i, 0, freqBarsData.length, 100, 255), 150, 255);
+          noStroke();
+          box(barWidth, h, barWidth);
+          pop();
+        }
+        pop();
+      }
+
+      function drawAmpSphere() {
+        colorMode(HSL);
+        noStroke();
+        ambientLight(150);
+        pointLight(255, 255, 255, 0, 0, 300);
+        let c = color(ampSphereColorHue, 80, 60);
+        ambientMaterial(c);
+        sphere(ampSphereRadius);
+        colorMode(RGB);
+      }
+
+      // ==== DRAG & DROP ====
+
+      ["dragenter", "dragover"].forEach((eventName) => {
+        window.addEventListener(
+          eventName,
+          (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropArea.classList.add("highlight");
+          },
+          false
+        );
+      });
+
+      ["dragleave", "drop"].forEach((eventName) => {
+        window.addEventListener(
+          eventName,
+          (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropArea.classList.remove("highlight");
+          },
+          false
+        );
+      });
+
+      window.addEventListener(
+        "drop",
+        (e) => {
+          let dt = e.dataTransfer;
+          let files = dt.files;
+
+          if (files.length > 0) {
+            const file = files[0];
+            if (file.type === "audio/mpeg" || file.name.endsWith(".mp3")) {
+              loadSoundFromFile(file);
+            } else {
+              alert("Please drop a valid MP3 audio file.");
+            }
+          }
+        },
+        false
+      );
+
+      function loadSoundFromFile(file) {
+        if (soundFile) {
+          soundFile.stop();
+          soundFile.disconnect();
+        }
+
+        soundFile = loadSound(
+          file,
+          () => {
+            soundFile.loop();
+            dropArea.style.display = "none";
+            controls.style.display = "flex";
+            points = [];
+            lastSampleTime = millis();
+            updatePlayPauseIcon(true);
+          },
+          (err) => {
+            alert("Error loading sound: " + err);
+          }
+        );
+      }
+
+      function updatePlayPauseIcon(isPlaying) {
+        if (isPlaying) {
+          playPauseBtn.innerHTML = "&#10073;&#10073;"; // pause icon
+          playPauseBtn.title = "Pause";
+          playPauseBtn.setAttribute("aria-label", "Pause");
+        } else {
+          playPauseBtn.innerHTML = "&#9658;"; // play icon
+          playPauseBtn.title = "Play";
+          playPauseBtn.setAttribute("aria-label", "Play");
+        }
+      }
+    </script>
+  </body>
+</html>
